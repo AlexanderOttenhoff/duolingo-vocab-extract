@@ -36,10 +36,10 @@ vocabList.fetch({
 
 		var words = _.map(vocabIndex, function(vocab) {
 			return vocab[0].attributes.word_string
-		})	
+		})
 
-		var ready = _.after(Number.parseInt(words.length/10+1), function(){
-			console.save(vocabList, "vocabList.json")
+		var ready = _.after(Number.parseInt(words.length / 10 + 1), function() {
+			console.save(toCsv(vocabList), "vocabList.csv")
 		});
 
 		for (var i = 0; i < words.length; i += 10) {
@@ -73,3 +73,26 @@ vocabList.fetch({
 		}
 	}
 })
+
+function toCsv(vocabList) {
+	var csv = _.reduce(vocabList.models, function(memo, model) {
+		var att = model.attributes;
+
+		var translations = _.uniq(att.translation)
+		translations = _.reduce(translations, function(memo, word) {
+			return memo + word + ", ";
+		}, "");
+		translations = translations.substring(0, translations.length - 1);
+
+		var word = att.word_string;
+		if (att.gender != null) {
+			word += " (" + att.gender + ")"
+		}
+
+		var tags = att.pos + " " + att.skill_url_title;
+
+		return memo + word + "\t" + translations + "\t" + tags + "\n";
+	}, "");
+
+	return csv;
+}
